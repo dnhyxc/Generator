@@ -187,11 +187,11 @@
         return generatorObject;
       }
     }
-  
+
     const wrapped = wrapper(function* (){
-      console.log(`First input: ${yield}`);
+      console.log(`First input: ${yield}`); // First input: dnhyxc
       return 'DONE';
     });
-  
-    console.log(wrapper().next('dnhyxc'));
+
+    console.log(wrapped().next('dnhyxc')); // {value: "DONE", done: true}
     ```  
