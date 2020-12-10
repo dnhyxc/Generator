@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator</title>
+</head>
+
+<body>
+  <div>Generator</div>
+  <script>
+    function* generator(x) {
+      const y = yield x + 2;
+      return y;
+    }
+    const g = generator(3);
+    console.log(g.next()); // 5
+    console.log(g.next(6)); // 6
+    console.log('------------------------------------------');
+
+
+    function* gen(x) {
+      try {
+        var y = yield x * 2
+      } catch (e) {
+        console.log(e);
+      }
+      return y;
+    }
+    const g1 = gen(3);
+    console.log(g1.next());
+    g1.throw('┗|｀O′|┛ 嗷~~出错了~~~');
+    console.log('------------------------------------------');
+
+
+    function* myGen(x) {
+      yield x * 3
+    }
+    const g2 = myGen(3);
+    console.log(g2.next());
+    console.log(g2.next());
+    console.log('------------------------------------------');
+
+
+    var arr = [1, [
+        [2, 3], 4
+      ],
+      [5, 6]
+    ];
+    var flat = function* (a) {
+      var length = a.length;
+      for (var i = 0; i < length; i++) {
+        var item = a[i];
+        if (typeof item !== 'number') {
+          yield* flat(item);
+        } else {
+          yield item;
+        }
+      }
+    };
+    for (var f of flat(arr)) {
+      console.log(f); // 1, 2, 3, 4, 5, 6
+    }
+    console.log('------------------------------------------');
+
+
+    var myIterable = {};
+    myIterable[Symbol.iterator] = function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    };
+    console.log([...myIterable]); // [1, 2, 3]
+    console.log(...myIterable); // 1, 2, 3
+    console.log('------------------------------------------');
+
+
+    function* iter() {
+      yield 1;
+      yield 2;
+      yield 3;
+    }
+    const i = iter();
+    console.log(i.next()); // {value:1, done:false}
+    console.log(i.next()); // {value:2, done:false}
+    console.log(i.next()); // {value:3, done:false}
+    console.log('------------------------------------------');
+
+    function* foo(x) {
+      var y = 2 * (yield(x + 1));
+      var z = yield(y / 3);
+      return (x + y + z);
+    }
+
+    var a = foo(5);
+    console.log(a.next()); // Object {value: 6, done: false }
+    console.log(a.next()); // Object {value: NaN, done: false }
+    console.log(a.next()); // Object {value: NaN, done: false }
+
+    var b = foo(5);
+    console.log(b.next()); // {value: 6, done: false}
+    console.log(b.next(12)); // {value: 8, done: false}
+    console.log(b.next(13)); // {value: 42, done: true}
+    console.log('------------------------------------------');
+
+
+    function* test(x) {
+      var y = 2 + (yield(x * 3));
+      //  如果(yield(y - 3))被（）包裹了，那么本次就不会加上后面的1，而是直接返回(yield(y - 3))
+      //  如果yield(y - 3)没有被（）包裹，那么本次计算就会加上后面的1再返回结果（即为yield(y - 3) + 1的值）。
+      var z = (yield(y - 3)) + 1;
+      return x + y + z; // X=1, y=4, z=3 
+    }
+
+    const t = test(1);
+    console.log(t.next()); // {value: 3, done: false}
+    console.log(t.next(2)); // {value: 1, done: false}
+    console.log(t.next(3)); // {value: 9, done: true}
+    console.log('------------------------------------------');
+
+
+    function wrapper(generatorFun) {
+      return function (...args) {
+        let generatorObject = generatorFun(...args);
+        generatorObject.next();
+        return generatorObject;
+      }
+    }
+
+    const wrapped = wrapper(function* () {
+      console.log(`First input: ${yield}`); // First input: dnhyxc
+      return 'DONE';
+    }); 
+
+    console.log(wrapped().next('dnhyxc')); // {value: "DONE", done: true}
+  </script>
+</body>
+
+</html>
