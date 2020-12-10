@@ -131,9 +131,268 @@
     const wrapped = wrapper(function* () {
       console.log(`First input: ${yield}`); // First input: dnhyxc
       return 'DONE';
-    }); 
+    });
 
     console.log(wrapped().next('dnhyxc')); // {value: "DONE", done: true}
+    console.log('------------------------------------------');
+
+
+    function* foo() {
+      yield 1;
+      yield 2;
+      yield 3;
+      yield 4;
+      yield 5;
+      return 6;
+    }
+
+    for (let v of foo()) {
+      console.log(v); // 1, 2, 3, 4, 5
+    }
+
+    const fo = foo();
+    console.log(fo.next()); // {value: 1, done:false}
+    console.log(fo.next()); // {value: 2, done:false}
+    console.log(fo.next()); // {value: 3, done:false}
+    console.log(fo.next()); // {value: 4, done:false}
+    console.log(fo.next()); // {value: 5, done:false}
+    console.log(fo.next()); // {value: 6, done:true}
+    console.log('------------------------------------------');
+
+
+    function* fibonacci() {
+      let [prev, curr] = [0, 1];
+      for (;;) {
+        yield curr;
+        [prev, curr] = [curr, prev + curr];
+        /*
+          curr: 1, prev: 1
+          curr: 2, prev: 1
+          curr: 3, prev；2
+          curr: 5, prev: 3
+          curr: 8, prev: 5
+          curr: 13, prev: 8
+          curr；21, prev: 13
+          curr: 34, prev: 21
+          curr: 55, prev: 34
+          分析：从第二次fibonacci函数执行时，curr的值为上一次prev的值加上上一次的curr的值，
+          因此第二次curr的值为第一次返回的curr的值1加上上一次prev的值0，
+          因此第二次返回的值还是curr为1。再次执行时，prev的值已经被curr重新赋值为上一次curr的值1了，
+          因此第三次curr的结果就是1+1的结果2了。
+        */
+      }
+    }
+
+    for (let n of fibonacci()) {
+      if (n > 1000) break;
+      console.log(n);
+    }
+    console.log('------------------------------------------');
+
+
+    function* objectEntries(obj) {
+      let propKeys = Reflect.ownKeys(obj);
+      // Reflect.ownKeys(obj)类似于Object.keys(obj)
+      // let propKeys = Object.keys(obj);
+      for (let propKey of propKeys) {
+        yield [propKey, obj[propKey]];
+      }
+    }
+
+    let dnh = {
+      first: 'dnh',
+      last: 'dnhyxc'
+    };
+
+    for (let [key, value] of objectEntries(dnh)) {
+      console.log(`${key}: ${value}`);
+      // first: dnh
+      // last: dnhyxc
+    }
+
+    const resObj = objectEntries(dnh);
+    console.log(resObj.next()); // {value:["first", "dnh"], done: false}
+
+
+    function* objectEntries1() {
+      let propKeys = Object.keys(this);
+
+      for (let propKey of propKeys) {
+        yield [propKey, this[propKey]];
+      }
+    }
+
+    let wyh = {
+      first: 'wyh',
+      last: 'wyhnxc'
+    };
+
+    wyh[Symbol.iterator] = objectEntries1;
+
+    for (let [key, value] of wyh) {
+      console.log(`${key}: ${value}`);
+      // first: wyh
+      // last: wyhnxc
+    }
+
+    const arrrr = [1, 2, 3, 4, 5]
+    const resss = arrrr[Symbol.iterator]()
+    console.log(resss.next()); // {value:1 ,done: false}
+
+    const objjj = {
+      name: 'aaa',
+      age: 26
+    }
+    // const objRes = objjj[Symbol.iterator](); // 报错，因为对象不具备 iterator 接口
+    console.log('------------------------------------------');
+
+
+    function* numbers() {
+      yield 1;
+      yield 2;
+      return 3;
+      yield 4;
+    }
+
+    // 扩展运算符
+    console.log([...numbers()]); // [1, 2]
+
+    // Array.from 方法
+    console.log(Array.from(numbers())); // [1, 2]
+
+    // 解构赋值
+    let [x, y] = numbers();
+    console.log(x, y) // 1, 2
+
+    // for...of 循环
+    for (let k of numbers()) {
+      console.log(k); // 1  2
+    }
+    console.log('------------------------------------------');
+
+
+    var ggg = function* () {
+      try {
+        yield;
+      } catch (e) {
+        console.log('内部错误', e); // 内部捕获 a
+      }
+    }
+
+    var ig = ggg();
+    ig.next();
+
+    try {
+      ig.throw('a');
+      ig.throw('b');
+    } catch (e) {
+      console.log('外部捕获', e); // 外部捕获 b
+    }
+    console.log('------------------------------------------');
+
+
+    var gener = function* () {
+      try {
+        yield;
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    var igener = gener();
+    igener.next();
+    igener.throw(new Error('出错了！'));
+    // Error: 出错了！...
+    console.log('------------------------------------------');
+
+
+    var gene = function* () {
+      while (true) {
+        try {
+          yield;
+        } catch (e) {
+          if (e != 'a') throw e;
+          console.log('内部捕获', e);
+        }
+      }
+    };
+
+    var igene = gene();
+    igene.next();
+
+    try {
+      throw new Error('a');
+      throw new Error('b');
+    } catch (e) {
+      console.log('外部捕获', e);
+    }
+    // 外部捕获 [Error: a]....
+    console.log('------------------------------------------');
+
+
+    var genera = function* gen() {
+      try {
+        yield console.log('a');
+      } catch (e) {
+        // ...
+      }
+      yield console.log('b');
+      yield console.log('c');
+    }
+
+    var ggenera = genera();
+    ggenera.next(); // a
+    ggenera.throw(); // b
+    ggenera.next(); // c
+    console.log('------------------------------------------');
+
+
+    function* gen9() {
+      yield 1;
+      yield 2;
+      yield 3;
+    }
+
+    var g9 = gen9();
+
+    console.log(g9.next()); // { value: 1, done: false }
+    console.log(g9.return('foo')); // { value: "foo", done: true }
+    console.log(g9.next()); // { value: undefined, done: true }
+    console.log('------------------------------------------');
+
+
+    function* gen8() {
+      yield 1;
+      yield 2;
+      yield 3;
+    }
+
+    var g8 = gen8();
+
+    console.log(g8.next()); // { value: 1, done: false }
+    console.log(g8.return()); // { value: undefined, done: true }
+    console.log('------------------------------------------');
+
+
+    function* mnumbers() {
+      yield 1;
+      try {
+        yield 2;
+        yield 3;
+      } finally {
+        yield 4;
+        yield 5;
+      }
+      yield 6;
+    }
+    var mg = mnumbers();
+    console.log(mg.next()); // { value: 1, done: false }
+    console.log(mg.next()); // { value: 2, done: false }
+    console.log(mg.return(7)); // { value: 4, done: false }
+    console.log(mg.next()); // { value: 5, done: false }
+    console.log(mg.next()); // { value: 7, done: true }
+    console.log('------------------------------------------');
+
   </script>
 </body>
 
