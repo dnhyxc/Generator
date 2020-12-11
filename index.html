@@ -10,6 +10,7 @@
 <body>
   <div>Generator</div>
   <script>
+    // Generator 函数
     function* generator(x) {
       const y = yield x + 2;
       return y;
@@ -65,6 +66,7 @@
     console.log('------------------------------------------');
 
 
+    // 使用 Generator 函数使对象拥有 iterator 接口
     var myIterable = {};
     myIterable[Symbol.iterator] = function* () {
       yield 1;
@@ -95,6 +97,7 @@
 
     var a = foo(5);
     console.log(a.next()); // Object {value: 6, done: false }
+    // 由于没有传入实参，所以x未undefined
     console.log(a.next()); // Object {value: NaN, done: false }
     console.log(a.next()); // Object {value: NaN, done: false }
 
@@ -110,7 +113,7 @@
       //  如果(yield(y - 3))被（）包裹了，那么本次就不会加上后面的1，而是直接返回(yield(y - 3))
       //  如果yield(y - 3)没有被（）包裹，那么本次计算就会加上后面的1再返回结果（即为yield(y - 3) + 1的值）。
       var z = (yield(y - 3)) + 1;
-      return x + y + z; // X=1, y=4, z=3 
+      return x + y + z; // X=1, y=4, z=4 
     }
 
     const t = test(1);
@@ -120,6 +123,7 @@
     console.log('------------------------------------------');
 
 
+    // 使第一次next()传入参数有效
     function wrapper(generatorFun) {
       return function (...args) {
         let generatorObject = generatorFun(...args);
@@ -137,6 +141,7 @@
     console.log('------------------------------------------');
 
 
+    // for...of执行的结果不会包含return的结果
     function* foo() {
       yield 1;
       yield 2;
@@ -160,6 +165,7 @@
     console.log('------------------------------------------');
 
 
+    // 使用Generator函数实现斐波那契数列
     function* fibonacci() {
       let [prev, curr] = [0, 1];
       for (;;) {
@@ -247,6 +253,7 @@
     console.log('------------------------------------------');
 
 
+    // 获取Generator返回对象中的value属性值的方式
     function* numbers() {
       yield 1;
       yield 2;
@@ -271,6 +278,7 @@
     console.log('------------------------------------------');
 
 
+    // try...catch捕获异常
     var ggg = function* () {
       try {
         yield;
@@ -347,6 +355,7 @@
     console.log('------------------------------------------');
 
 
+    // return()方法
     function* gen9() {
       yield 1;
       yield 2;
@@ -374,6 +383,7 @@
     console.log('------------------------------------------');
 
 
+    // 在try...finally中执行return()方法
     function* mnumbers() {
       yield 1;
       try {
@@ -393,6 +403,400 @@
     console.log(mg.next()); // { value: 7, done: true }
     console.log('------------------------------------------');
 
+
+    // yield* 表达式
+    function* foo() {
+      yield 'a';
+      yield 'b';
+    }
+
+    function* bar() {
+      yield 'x';
+      // 手动遍历 foo()
+      for (let i of foo()) {
+        console.log(i);
+      }
+      yield 'y';
+    }
+
+    for (let v of bar()) {
+      console.log(v);
+    }
+    // x
+    // a
+    // b
+    // y
+    console.log('------------------------------------------');
+
+
+    // 使用yield*表达式
+    function* foo() {
+      yield 'a';
+      yield 'b';
+    }
+
+    function* bar() {
+      yield 'x';
+      yield* foo();
+      yield 'y';
+    }
+
+    // 等同于
+    function* bar() {
+      yield 'x';
+      yield 'a';
+      yield 'b';
+      yield 'y';
+    }
+
+    // 等同于
+    function* bar() {
+      yield 'x';
+      for (let v of foo()) {
+        yield v;
+      }
+      yield 'y';
+    }
+
+    for (let v of bar()) {
+      console.log(v);
+    }
+    // "x"
+    // "a"
+    // "b"
+    // "y"
+    console.log('------------------------------------------');
+
+
+    // 使用与不使用yield*表达式对比
+    function* inner() {
+      yield 'haha';
+    }
+
+    function* outer1() {
+      yield 'open'
+      yield inner();
+      yield 'close';
+    }
+
+    var gen = outer1();
+    console.log(gen.next().value); // 'open'
+    console.log(gen.next().value); // 返回一个遍历器对象(inner {<suspended>})
+    console.log(gen.next().value); // 'open'
+
+    function* outer2() {
+      yield 'open';
+      yield* inner();
+      yield 'close';
+    }
+
+    var gen = outer2();
+    console.log(gen.next().value); // 'open' 
+    console.log(gen.next().value); // 'haha' 
+    console.log(gen.next().value); // 'close'
+    console.log('------------------------------------------');
+
+
+    let delegatedIterator = (function* () {
+      yield 'hello';
+      yield 'Bye';
+    }());
+
+    let delegatingIterator = (function* () {
+      yield 'Greetings';
+      yield* delegatedIterator;
+      yield 'OK, bye';
+    }());
+
+    for (let value of delegatingIterator) {
+      console.log(value);
+    }
+    // Greetings
+    // hello
+    // Bye
+    // OK, bye
+    console.log('------------------------------------------');
+
+
+    // yield* 后面的Generator函数中存在return的情况
+    let hasReturn = function* () {
+      yield '111';
+      yield '222';
+      return '333';
+    }
+
+    let getRes = function* () {
+      yield 'aaa';
+      let value = yield* hasReturn();
+      yield value;
+      yield 'bbb';
+    }
+
+    let res = getRes();
+    for (let v of res) {
+      console.log(v);
+      // aaa
+      // 111
+      // 222
+      // 333
+      // bbb
+    }
+    console.log('------------------------------------------');
+
+
+    function* gr() {
+      yield*['a', 'b', 'c'];
+    }
+
+    let ge = gr();
+
+    for (let v of ge) {
+      console.log(v); // a b c
+    }
+    console.log('------------------------------------------');
+
+
+    // 使用yield*遍历字符串
+    let read = (function* () {
+      yield 'hello';
+      yield*'hello';
+    })();
+
+    console.log(read.next().value); // hello
+    console.log(read.next().value); // h
+    console.log('------------------------------------------');
+
+
+    // 使用yield*遍历Generator中具有return的情况
+    function* foo() {
+      yield 2;
+      yield 3;
+      return 'foo';
+    }
+
+    function* bar() {
+      yield 1;
+      var v = yield* foo();
+      console.log('v: ' + v); // v: foo 
+      yield 4;
+    }
+
+    var it = bar();
+    console.log(it.next()); // {value: 1, done: false}
+    console.log(it.next()); // {value: 2, done: false}
+    console.log(it.next()); // {value: 3, done: false}
+    console.log(it.next()); // {value: 4, done: false}
+    console.log(it.next()); // {value: undefined, done: true}
+    console.log('------------------------------------------');
+
+
+    function* genFuncWithReturn() {
+      yield 'a';
+      yield 'b';
+      return 'The result';
+    }
+
+    function* logReturned(genObj) {
+      let result = yield* genObj;
+      console.log(result); // The result
+    }
+
+    console.log([...logReturned(genFuncWithReturn())]); // ["a", "b"]
+    console.log('------------------------------------------');
+
+
+    // 利用yield*取嵌套数组的所有成员
+    function* iterTree(tree) {
+      if (Array.isArray(tree)) {
+        for (let i = 0; i < tree.length; i++) {
+          yield* iterTree(tree[i]);
+        }
+      } else {
+        yield tree;
+      }
+    }
+
+    const tree = ['a', ['b', [1, [3, 4, 5], 2], 'c'],
+      ['d', 'e']
+    ];
+
+    for (let x of iterTree(tree)) {
+      console.log(x);
+    }
+    // a
+    // b
+    // 1
+    // 3
+    // 4
+    // 5
+    // 2
+    // c
+    // d
+    // e
+
+    console.log([...iterTree(tree)]); // ["a", "b", 1, 3, 4, 5, 2, "c", "d", "e"]
+    // 类似于flat()方法
+    const r = tree.flat(4);
+    console.log(r); // ["a", "b", 1, 3, 4, 5, 2, "c", "d", "e"]
+    console.log('------------------------------------------');
+
+
+    // 下面是二叉树的构造函数，
+    // 三个参数分别是左树、当前节点和右树
+    function Tree2(left, label, right) {
+      this.left = left;
+      this.label = label;
+      this.right = right;
+    }
+
+    // 下面是中序（inorder）遍历函数。
+    // 由于返回的是一个遍历器，所以要用generator函数。
+    // 函数体内采用递归算法，所以左树和右树要用yield*遍历
+    function* inorder(t) {
+      if (t) {
+        yield* inorder(t.left);
+        yield t.label;
+        yield* inorder(t.right);
+      }
+    }
+
+    // 下面生成二叉树
+    function make(array) {
+      // 判断是否为叶节点
+      if (array.length == 1) return new Tree2(null, array[0], null);
+      return new Tree2(make(array[0]), array[1], make(array[2]));
+    }
+    let tree2 = make([
+      [
+        ['a'], 'b', ['c']
+      ], 'd', [
+        ['e'], 'f', ['g']
+      ]
+    ]);
+
+    // 遍历二叉树
+    var result = [];
+    for (let node of inorder(tree2)) {
+      result.push(node);
+    }
+
+    console.log(result); // ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    console.log('------------------------------------------');
+
+
+    // Generator 函数的this
+    function* gf() {}
+    gf.prototype.hello = function () {
+      return 'hi!';
+    };
+    let objf = gf();
+    console.log(objf instanceof gf); // true
+    console.log(objf.hello()); // 'hi!'
+    console.log('------------------------------------------');
+
+
+    // 使用call方法绑定Generator函数内部的this
+    function* F() {
+      this.a = 1;
+      yield this.b = 2;
+      yield this.c = 3;
+    }
+    var obj = {};
+    var f = F.call(obj);
+
+    console.log(f.next()); // Object {value: 2, done: false}
+    console.log(f.next()); // Object {value: 3, done: false}
+    console.log(f.next()); // Object {value: undefined, done: true}
+
+    console.log(obj.a); // 1
+    console.log(obj.b); // 2
+    console.log(obj.c); // 3
+    console.log('------------------------------------------');
+
+
+    function* F() {
+      this.a = 1;
+      yield this.b = 2;
+      yield this.c = 3;
+    }
+    var f = F.call(F.prototype);
+
+    console.log(f.next()); // Object {value: 2, done: false}
+    console.log(f.next()); // Object {value: 3, done: false}
+    console.log(f.next()); // Object {value: undefined, done: true}
+
+    console.log(f.a); // 1
+    console.log(f.b); // 2
+    console.log(f.c); // 3
+    console.log('------------------------------------------');
+
+
+    // 最终写法
+    function* geng() {
+      this.a = 1;
+      yield this.b = 2;
+      yield this.c = 3;
+    }
+
+    function F() {
+      return geng.call(geng.prototype);
+    }
+
+    var f = new F();
+
+    console.log(f.next()); // Object {value: 2, done: false}
+    console.log(f.next()); // Object {value: 3, done: false}
+    console.log(f.next()); // Object {value: undefined, done: true}
+
+    console.log(f.a); // 1
+    console.log(f.b); // 2
+    console.log(f.c); // 3
+    console.log('------------------------------------------');
+
+
+    var ticking = true;
+    var clock = function () {
+      if (ticking) {
+        console.log('Tick!');
+      } else {
+        console.log('Tock!')
+      };
+      ticking = !ticking;
+    }
+    clock(); // Tick
+    clock(); // Tock
+    clock(); // Tick
+    console.log('------------------------------------------');
+
+
+    var clock1 = function* () {
+      while (true) {
+        console.log('Tick');
+        yield;
+        console.log('Tock');
+        yield;
+      }
+    }
+    var cl = clock1();
+    cl.next(); // Tick
+    cl.next(); // Tock
+    cl.next(); // Tick
+
+
+    // Generator 执行上下文
+    function* genrr() {
+      yield 1;
+      return 2;
+    }
+
+    let grr = genrr();
+
+    console.log(
+      grr.next(), grr.next()
+      // {value: 1, done: false}
+      // {value: 2, done: true}
+    )
+    console.log('------------------------------------------');
   </script>
 </body>
 
