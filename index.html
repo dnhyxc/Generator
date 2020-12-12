@@ -797,6 +797,45 @@
       // {value: 2, done: true}
     )
     console.log('------------------------------------------');
+
+
+    // Generator控制流管理
+    function* long(value1) {
+      try {
+        var value2 = yield {
+          a: 2
+        };
+        var value3 = yield {
+          b: 3
+        };
+        var value4 = yield {
+          c: 4
+        };
+        var value5 = yield {
+          d: 5
+        };
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    const vl = scheduler(long({
+      e: 0
+    }))
+
+    function scheduler(task) {
+      var taskObj = task.next(task.value);
+      if (!taskObj.done) {
+        task.value = taskObj.value;
+        console.log(task.value);
+        // {a: 2}
+        // {b: 3}
+        // {c: 4}
+        // {d: 5}
+        scheduler(task);
+      }
+    }
+    console.log('------------------------------------------');
   </script>
 </body>
 
