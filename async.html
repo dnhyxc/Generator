@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator-async</title>
+</head>
+
+<body>
+  <script>
+    function* gen(x) {
+      var y = yield x + 2;
+      return y;
+    }
+
+    var g = gen(1);
+    console.log(g.next()); // {value: 3, done: false}
+    console.log(g.next()); // {value: undefined, done: true} 
+  </script>
+</body>
+
+</html>
