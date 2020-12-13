@@ -17,6 +17,80 @@
     var g = gen(1);
     console.log(g.next()); // {value: 3, done: false}
     console.log(g.next()); // {value: undefined, done: true} 
+
+
+    // Thunk转换器
+    // fs.readFile(fileName, callback);
+
+    // // Thunk版本的readFile（单参数版本）
+    // var Thunk = function (fileName) {
+    //   return function (callback) {
+    //     return fs.readFile(fileName, callback);
+    //   }
+    // }
+
+    // var readFileThunk = Thunk(fileName);
+    // readFileThunk(callback);
+
+    function fn(name, callback) {
+      console.log(name);
+      callback(name + 'bbb');
+    };
+
+    var tun = function (fn) {
+      return function (name) {
+        return function (callback) {
+          return fn.call(this, name, callback);
+        }
+      }
+    }
+
+    var callback = function (name) {
+      console.log(name);
+    }
+
+    const mThunk = tun(fn);
+    mThunk('aaa')(callback);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>手动分割线>>>>>>>>>>>>>>>>>>>>>>>>>>')
+
+
+    // 传统方式
+    function say() {
+      return Promise.resolve('hello').then(function (hello) {
+        console.log(hello);
+      })
+    }
+
+    function hello() {
+      say();
+      console.log('world');
+    }
+
+    hello();
+    // world
+    // hello
+
+    // co模块
+    function co(gen) {
+      var it = gen();
+      var ret = it.next();
+      ret.value.then(function (res) {
+        it.next();
+      })
+    }
+
+    function sayHello() {
+      return Promise.resolve('hello').then(function (hello) {
+        console.log(hello);
+      })
+    }
+
+    co(function* helloWorld() {
+      yield sayHello();
+      console.log('world');
+    })
+    // hello
+    // world
   </script>
 </body>
 
